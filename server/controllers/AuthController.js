@@ -26,10 +26,10 @@ export const onBoardUser = async (req,res,next)=>{
         return res.send("Email, Name and Image are required!");
     }    
     const prisma=getPrismaInstance();
-    await prisma.user.create({
+    const user=await prisma.user.create({
         data:{email,name,about,profilePicture},
     });
-    return res.json({msg:"Success",status:true})
+    return res.json({msg:"Success",status:true,data:user})
     } catch (error) {
         next(error)
     }
