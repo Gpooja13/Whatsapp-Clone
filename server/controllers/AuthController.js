@@ -47,14 +47,16 @@ export const getAllUsers = async (req, res, next) => {
         about: true,
       },
     });
-    const usersGroupByInitialLetter={};
-    users.forEach((user)=>{
-        const intialLetter=user.name.charAt(0).toUpperCase();
-        if(!usersGroupByInitialLetter[intialLetter]){
-            usersGroupByInitialLetter[intialLetter]=[];
-        }
-        usersGroupByInitialLetter[intialLetter].push(user);
+    const usersGroupByInitialLetter = {};
+    users.forEach((user) => {
+      const intialLetter = user.name.charAt(0).toUpperCase();
+      if (!usersGroupByInitialLetter[intialLetter]) {
+        usersGroupByInitialLetter[intialLetter] = [];
+      }
+      usersGroupByInitialLetter[intialLetter].push(user);
     });
-    return res.status(200).send({users:usersGroupByInitialLetter})
-  } catch (error) {}
+    return res.status(200).send({ users: usersGroupByInitialLetter });
+  } catch (error) {
+    next(error);
+  }
 };

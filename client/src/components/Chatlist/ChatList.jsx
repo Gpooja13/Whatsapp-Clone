@@ -26,9 +26,7 @@ function ChatList() {
           <List />
         </>
       )}
-      {pageType === "all-contacts" && (
-       <ContactsList/>
-      )}
+      {pageType === "all-contacts" && <ContactsList />}
     </div>
   );
 }

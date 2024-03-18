@@ -1,24 +1,35 @@
 import React, { useEffect, useState } from "react";
 import ChatList from "./Chatlist/ChatList";
 import Empty from "./Empty";
-import List from "./Chatlist/List";
 import { useRouter } from "next/router";
 import { useStateProvider } from "@/context/StateContext";
 import { onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth } from "@/utils/FirebaseConfig";
 import axios from "axios";
 import { reducerCases } from "@/context/constants";
-import { CHECK_USER_ROUTE } from "@/utils/ApiRoutes";
+import { CHECK_USER_ROUTE, GET_MESSAGES_ROUTE } from "@/utils/ApiRoutes";
 import Chat from "./Chat/Chat";
 
 function Main() {
   const router = useRouter();
-  const [{ userInfo }, dispatch] = useStateProvider();
+  const [{ userInfo, currentChatUser }, dispatch] = useStateProvider();
   const [redirectLogin, setRedirectLogin] = useState(false);
 
   useEffect(() => {
     if (redirectLogin) router.push("/login");
   }, [redirectLogin]);
+
+  useEffect(() => {
+    const getMessages = async () => {
+      const { data:{messages} } = await axios.get(
+        `${GET_MESSAGES_ROUTE}/${userInfo.id}/${currentChatUser.id}`
+      );
+     dispatch({type:reducerCases.SET_MESSAGES,messages})
+    };
+    if (currentChatUser?.id) {
+      getMessages();
+    }
+  }, [currentChatUser]);
 
   onAuthStateChanged(firebaseAuth, async (currentUser) => {
     if (!currentUser) setRedirectLogin(true);
@@ -56,9 +67,7 @@ function Main() {
     <>
       <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full">
         <ChatList />
-        {/* <Empty /> */}
-        <Chat/>
-        {/* <List /> */}
+        {currentChatUser ? <Chat /> : <Empty />}
       </div>
     </>
   );
