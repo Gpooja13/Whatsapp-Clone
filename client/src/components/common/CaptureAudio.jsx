@@ -1,5 +1,5 @@
 // import { useStateProvider } from "@/context/StateContext";
-// import React, { useState, useEffect } from "react";
+// import React, { useState, useEffect, useRef } from "react";
 // import { FaMicrophone, FaPauseCircle, FaTrash } from "react-icons/fa";
 // import { MdSend } from "react-icons/md";
 // import WaveSurfer from "wavesurfer.js";
@@ -47,9 +47,39 @@
 //         console.log("Error acessing microphone: ", error);
 //       });
 //   };
-//   const handleStopRecording = () => {};
-//   const handlePlayRecording = () => {};
-//   const handlePauseRecording = () => {};
+
+//   const handleStopRecording = () => {
+//     if (mediaRecordedRef.current && isRecording) {
+//       mediaRecordedRef.current.stop();
+//       setIsRecording(false);
+//       waveForm.stop();
+
+//       const audioChunks = [];
+//       mediaRecordedRef.current.addEventListener("dataavailable", (event) => {
+//         audioChunks.push(event.data);
+//       });
+//       mediaRecordedRef.current.addEventListener("stop", () => {
+//         const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
+//         const audioFile = new File(audioBlob, "recording.mp3");
+//         setRenderedAudio(audioFile);
+//       });
+//     }
+//   };
+
+//   const handlePlayRecording = () => {
+//     if (recordedAudio) {
+//       waveForm.stop();
+//       waveForm.play();
+//       recordedAudio.play();
+//       setIsPlaying(true);
+//     }
+//   };
+
+//   const handlePauseRecording = () => {
+//     waveForm.stop();
+//     recordedAudio.pause();
+//     setIsPlaying(false);
+//   };
 
 //   const sendRecording = () => {};
 
@@ -62,6 +92,18 @@
 //       "0"
 //     )}`;
 //   };
+
+//   useEffect(() => {
+//     if (recordedAudio) {
+//       const updatePlaybackTime = () => {
+//         setCurrentPlayBackTime(recordedAudio.currentTime);
+//       };
+//       recordedAudio.addEventListener("timeupdate", updatePlaybackTime);
+//       return () => {
+//         recordedAudio.removeEventListener("timeupdate", updatePlaybackTime);
+//       };
+//     }
+//   }, [recordedAudio]);
 
 //   useEffect(() => {
 //     const waveSurface = WaveSurfer.create({
@@ -133,26 +175,26 @@
 //           <span>{formatTime(currentPlayBackTime)}</span>
 //         )}
 //         <audio ref={audioRef} hidden />
-//         <div className="mr-4">
-//           {!isRecording ? (
-//             <FaMicrophone
-//               className="text-red-500"
-//               onClick={handleStartRecording}
-//             />
-//           ) : (
-//             <FaPauseCircle
-//               className="text-red-500"
-//               onClick={handleStopRecording}
-//             />
-//           )}
-//         </div>
-//         <div>
-//           <MdSend
-//             className="text-panel-header-icon cursor-pointer mr-4"
-//             title="Send"
-//             onClick={sendRecording}
+//       </div>
+//       <div className="mr-4">
+//         {!isRecording ? (
+//           <FaMicrophone
+//             className="text-red-500"
+//             onClick={handleStartRecording}
 //           />
-//         </div>
+//         ) : (
+//           <FaPauseCircle
+//             className="text-red-500"
+//             onClick={handleStopRecording}
+//           />
+//         )}
+//       </div>
+//       <div>
+//         <MdSend
+//           className="text-panel-header-icon cursor-pointer mr-4"
+//           title="Send"
+//           onClick={sendRecording}
+//         />
 //       </div>
 //     </div>
 //   );
