@@ -6,8 +6,6 @@ import { reducerCases } from "@/context/constants";
 import axios from "axios";
 import { GET_CALL_TOKEN } from "@/utils/ApiRoutes";
 
-// import { ZegoExpressEngine } from "zego-express-engine-webrtc";//fix this
-
 function Container({ data }) {
   const [{ videoCall, socket, userInfo }, dispatch] = useStateProvider();
   const [callAccepted, setCallAccepted] = useState(false);
@@ -31,10 +29,10 @@ function Container({ data }) {
       try {
         const {
           data: { token: returnedToken },
-        } = await axios.get(`${GET_CALL_TOKEN}/${userInfo.id}`); 
+        } = await axios.get(`${GET_CALL_TOKEN}/${userInfo.id}`);
         setToken(returnedToken);
       } catch (error) {
-        console.log(error);
+        console.log("error", error);
       }
     };
     getToken();
@@ -43,7 +41,7 @@ function Container({ data }) {
   useEffect(() => {
     const startCall = async () => {
       import("zego-express-engine-webrtc").then(
-        async ({ ZegoExpressEngine}) => {
+        async ({ ZegoExpressEngine }) => {
           const zg = new ZegoExpressEngine(
             process.env.NEXT_PUBLIC_ZEGO_APP_ID,
             process.env.NEXT_PUBLIC_ZEGO_SERVER_ID
@@ -103,10 +101,13 @@ function Container({ data }) {
           videoElement.autoplay = true;
           videoElement.muted = false;
           videoElement.playsInline = true;
-
-          localVideo.appendChild(videoElement);
+          if (localVideo) {
+            localVideo.appendChild(videoElement);
+          }
           const td = document.getElementById("video-local-zego");
-          td.srcObject = localStream;
+          if (td) {
+            td.srcObject = localStream;
+          }
           const streamID = "123" + Date.now();
           setPublishStream(streamID);
           setLocalStream(localStream);
@@ -121,7 +122,8 @@ function Container({ data }) {
 
   const endCall = () => {
     const id = data.id;
-    if (zgVar && localStream && publishStream) {zgVar.destroyStream(localStream);
+    if (zgVar && localStream && publishStream) {
+      zgVar.destroyStream(localStream);
       zgVar.stopPublishingStream(publishStream);
       zgVar.logoutRoom(data.roomId.toString());
     }
