@@ -79,7 +79,6 @@ function Main() {
       });
 
       socket.current.on("incoming-video-call", ({ from, roomId, callType }) => {
-       
         dispatch({
           type: reducerCases.SET_INCOMING_VIDEO_CALL,
           incomingVideoCall: { ...from, roomId, callType },
@@ -92,6 +91,10 @@ function Main() {
 
       socket.current.on("video-call-rejected", () => {
         dispatch({ type: reducerCases.END_CALL });
+      });
+
+      socket.current.on("onlineUsers", ({ onlineUsers }) => {
+        dispatch({ type: reducerCases.SET_ONLINE_USERS, onlineUsers });
       });
 
       setSocketEvent(true);
