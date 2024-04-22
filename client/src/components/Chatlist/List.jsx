@@ -39,9 +39,7 @@ function List() {
         : userContacts.map((contact) => (
             <ChatLIstItem data={contact} key={contact.id} />
           ))}
-      {/* {userContacts.map((contact) => (
-        <ChatLIstItem data={contact} key={contact.id} />
-      ))} */}
+      
     </div>
   );
 }

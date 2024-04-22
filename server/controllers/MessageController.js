@@ -4,15 +4,16 @@ import { renameSync } from "fs";
 export const addMessage = async (req, res, next) => {
   try {
     const prisma = getPrismaInstance();
-    const { message, from, to } = req.body;
+    const {secretKey, message, from, to } = req.body;
     const getUser = onlineUsers.get(to);
-    if (message && from && to) {
+    if (secretKey && message && from && to) {
       const newMessage = await prisma.messages.create({
         data: {
           message,
           sender: { connect: { id: parseInt(from) } },
           receiver: { connect: { id: parseInt(to) } },
           messageStatus: getUser ? "delivered" : "sent",
+          secretKey,
         },
         include: { sender: true, receiver: true },
       });

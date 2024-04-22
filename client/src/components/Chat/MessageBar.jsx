@@ -5,12 +5,12 @@ import axios from "axios";
 import EmojiPicker from "emoji-picker-react";
 import React, { useEffect, useState, useRef } from "react";
 import { BsEmojiSmile } from "react-icons/bs";
-import { FaMicrophone } from "react-icons/fa";
 import { ImAttachment } from "react-icons/im";
 import { MdSend } from "react-icons/md";
 import PhotoPicker from "../common/PhotoPicker";
-import dynamic from "next/dynamic";
-const CaptureAudio=dynamic(()=>import("../common/CaptureAudio"),{ssr:false});
+import EthCrypto from "eth-crypto";
+import { nanoid } from "nanoid";
+import CryptoJS from "crypto-js";
 
 function MessageBar() {
   const [{ userInfo, currentChatUser, socket }, dispatch] = useStateProvider();
@@ -63,15 +63,28 @@ function MessageBar() {
 
   const sendMessage = async () => {
     try {
+      const secretKey = nanoid();
+      const cipherMessage = CryptoJS.AES.encrypt(message, secretKey).toString();
+
+      const encrypted = await EthCrypto.encryptWithPublicKey(
+        Buffer.from(currentChatUser?.publicKey.slice(2), "hex"),
+        // currentChatUser?.publicKey,
+        secretKey
+      );
+      const encryptedSecretKey = EthCrypto.cipher.stringify(encrypted); 
+
       const { data } = await axios.post(ADD_MESSAGE_ROUTE, {
         to: currentChatUser?.id,
         from: userInfo?.id,
-        message,
+        message: cipherMessage,
+        secretKey: encryptedSecretKey,
       });
+
       socket.current.emit("send-msg", {
         to: currentChatUser?.id,
         from: userInfo?.id,
         message: data.message,
+        secretKey: data.encryptedSecretKey,
       });
       dispatch({
         type: reducerCases.ADD_MESSAGE,
@@ -81,6 +94,25 @@ function MessageBar() {
         fromSelf: true,
       });
       setMessage("");
+
+      // const { data } = await axios.post(ADD_MESSAGE_ROUTE, {
+      //   to: currentChatUser?.id,
+      //   from: userInfo?.id,
+      //   message,
+      // });
+      // socket.current.emit("send-msg", {
+      //   to: currentChatUser?.id,
+      //   from: userInfo?.id,
+      //   message: data.message,
+      // });
+      // dispatch({
+      //   type: reducerCases.ADD_MESSAGE,
+      //   newMessage: {
+      //     ...data.message,
+      //   },
+      //   fromSelf: true,
+      // });
+      // setMessage("");
     } catch (error) {
       console.log(error);
     }
@@ -151,7 +183,12 @@ function MessageBar() {
           </div>
           <div className="flex w-10 items-center justify-center">
             <button>
-              {message.length ? (
+              <MdSend
+                className="text-panel-header-icon cursor-pointer text-xl"
+                title="Send Message"
+                onClick={sendMessage}
+              />
+              {/* {message.length ? (
                 <MdSend
                   className="text-panel-header-icon cursor-pointer text-xl"
                   title="Send Message"
@@ -163,7 +200,7 @@ function MessageBar() {
                   title="Record"
                   onClick={() => setShowAudioRecorder(true)}
                 />
-              )}
+              )} */}
             </button>
           </div>
         </>

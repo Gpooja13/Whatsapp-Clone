@@ -18,6 +18,7 @@ model User{
   about String @default("")
   sentMessages Messages[] @relation("sendMessages")
   receivedMessages Messages[] @relation("receivedMessages")
+  publicKey String
 }
 
 model Messages{
@@ -29,5 +30,6 @@ model Messages{
   type String @default("text")
   message String
   messageStatus String @default("sent")
+  secretKey String @default("")
   createdAt DateTime @default(now())
 }

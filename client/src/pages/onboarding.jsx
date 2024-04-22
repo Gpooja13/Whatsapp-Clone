@@ -7,10 +7,11 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { ONBOARD_USER_ROUTE } from "@/utils/ApiRoutes";
 import { reducerCases } from "@/context/constants";
+import EthCrypto from 'eth-crypto';
 
 function onboarding() {
   const router = useRouter();
-  const [{ userInfo, newUser },dispatch] = useStateProvider();
+  const [{ userInfo, newUser }, dispatch] = useStateProvider();
   const [name, setName] = useState(userInfo?.name || "");
   const [about, setAbout] = useState("");
   const [image, setImage] = useState("/default_avatar.png");
@@ -24,30 +25,33 @@ function onboarding() {
   }, [newUser, userInfo, router]);
 
   const onBoardUserHandler = async () => {
-   
     if (validateDetails()) {
       const email = userInfo.email;
+      const { privateKey, publicKey } = EthCrypto.createIdentity();
+      localStorage.setItem("privateKey",privateKey);
       try {
         const { data } = await axios.post(ONBOARD_USER_ROUTE, {
           email,
           name,
           about,
           image,
+          publicKey:publicKey,
         });
-        console.log("hi1");
+
         if (data.status) {
           dispatch({ type: reducerCases.SET_NEW_USER, newUser: false });
           dispatch({
             type: reducerCases.SET_USER_INFO,
             userInfo: {
-              id:data.data.id,
+              id: data.data.id,
               name,
               email,
               profileImage: image,
               status: about,
+              publicKey: data.data.privateKey,
             },
           });
-          console.log("hi2");
+
           router.push("/");
         }
       } catch (error) {
