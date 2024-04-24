@@ -6,6 +6,7 @@ export const initialState = {
   contactsPage: false,
   currentChatUser: undefined,
   messages: [],
+  decryptedMessage:[],
   socket: undefined,
   messagesSearch: false,
   userContacts: [],
@@ -44,6 +45,11 @@ const reducer = (state, action) => {
       return {
         ...state,
         messages: action.messages,
+      };
+    case reducerCases.SET_DECRYPTED_MESSAGES:
+      return {
+        ...state,
+        decryptedMessage: action.decryptedMessage,
       };
     case reducerCases.SET_SOCKET:
       return {

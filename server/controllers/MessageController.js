@@ -2,24 +2,27 @@ import getPrismaInstance from "../utils/PrismaClient.js";
 import { renameSync } from "fs";
 
 export const addMessage = async (req, res, next) => {
+  
   try {
     const prisma = getPrismaInstance();
-    const {secretKey, message, from, to } = req.body;
+    const { receiverSecretKey, senderSecretKey, message, from, to } = req.body;
+    
     const getUser = onlineUsers.get(to);
-    if (secretKey && message && from && to) {
+    if (receiverSecretKey && senderSecretKey && message && from && to) {
       const newMessage = await prisma.messages.create({
         data: {
           message,
           sender: { connect: { id: parseInt(from) } },
           receiver: { connect: { id: parseInt(to) } },
           messageStatus: getUser ? "delivered" : "sent",
-          secretKey,
+          receiverSecretKey,
+          senderSecretKey,
         },
         include: { sender: true, receiver: true },
       });
       return res.status(201).send({ message: newMessage });
     }
-    return res.status(400).send("From, to and message is required.");
+    return res.status(400).send("All fields is required.");
   } catch (error) {
     next(error);
   }
@@ -171,7 +174,10 @@ export const getInitialContactswithMessages = async (req, res, next) => {
       });
     }
 
-    return res.status(200).json({ users: Array.from(users.values()),onlineUsers:Array.from(onlineUsers.keys()), });
+    return res.status(200).json({
+      users: Array.from(users.values()),
+      onlineUsers: Array.from(onlineUsers.keys()),
+    });
   } catch (error) {
     next(error);
   }

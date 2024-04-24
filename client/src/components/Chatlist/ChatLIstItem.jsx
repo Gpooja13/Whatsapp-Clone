@@ -20,7 +20,7 @@ function ChatLIstItem({ data, isContactsPage=false }) {
           profilePicture: data.profilePicture,
           email: data.email,
           id: userInfo.id === data.senderId ? data.receiverId : data.senderId,
-          publicKey:data.publicKey,
+          publicKey: data.publicKey,
         },
       });
     } else {

@@ -36,7 +36,6 @@ function login() {
               name,
               email,
               profileImage,
-              status: "",
             },
           });
           router.push("/onboarding");
@@ -47,17 +46,22 @@ function login() {
             email,
             profilePicture: profileImage,
             status,
+            publicKey,
           } = data.data;
+     
           dispatch({
             type: reducerCases.SET_USER_INFO,
+            //  userInfo: data.data
             userInfo: {
               id,
               name,
               email,
               profileImage,
+              publicKey,
               status,
             },
           });
+         
           router.push("/");
         }
       }

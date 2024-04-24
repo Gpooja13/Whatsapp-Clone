@@ -30,6 +30,7 @@ model Messages{
   type String @default("text")
   message String
   messageStatus String @default("sent")
-  secretKey String @default("")
+  receiverSecretKey String @default("")
+  senderSecretKey String @default("")
   createdAt DateTime @default(now())
 }

@@ -8,6 +8,8 @@ import { firebaseAuth } from "@/utils/FirebaseConfig";
 import axios from "axios";
 import { reducerCases } from "@/context/constants";
 import { CHECK_USER_ROUTE, GET_MESSAGES_ROUTE, HOST } from "@/utils/ApiRoutes";
+import CryptoJS from "crypto-js";
+import EthCrypto from "eth-crypto";
 import Chat from "./Chat/Chat";
 import { io } from "socket.io-client";
 import SearchMessages from "./Chat/SearchMessages";
@@ -22,6 +24,7 @@ function Main() {
     {
       userInfo,
       currentChatUser,
+      messages,
       messagesSearch,
       videoCall,
       voiceCall,
@@ -33,24 +36,99 @@ function Main() {
   const [redirectLogin, setRedirectLogin] = useState(false);
   const socket = useRef();
   const [socketEvent, setSocketEvent] = useState(false);
+  // const privateKey =localStorage.getItem("privateKey");
+  const privateKey =
+    "0xf17634ebbc134ab46dab039fcd49b551c443b1093ec106861a0c0cc9c77b6f85";
 
   useEffect(() => {
     if (redirectLogin) router.push("/login");
   }, [redirectLogin]);
 
+  const decryptChat = async (secretKey, message) => {
+    console.log("privateKey ", privateKey);
+    try {
+      const decryptedSecretKey = await EthCrypto.decryptWithPrivateKey(
+        privateKey,
+        secretKey
+      );
+      const decryptedMessage = CryptoJS.AES.decrypt(
+        message,
+        decryptedSecretKey
+      ).toString(CryptoJS.enc.Utf8);
+
+      return decryptedMessage;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const decryptMessages = async (messages) => {
+    try {
+      const decryptedMessages = messages.map(async (message) => {
+        if (message.senderId === userInfo.id) {
+          const decryptedMessage = await decryptChat(
+            message.senderSecretKey,
+            message.message
+          );
+          return { ...message, message: decryptedMessage };
+        } else if (message.senderId === currentChatUser.id) {
+          const decryptedMessage = await decryptChat(
+            message.receiverSecretKey,
+            message.message
+          );
+          return { ...message, message: decryptedMessage };
+        }
+      });
+      const decrypted = await Promise.all(decryptedMessages);
+      // dispatch({ type: reducerCases.SET_MESSAGES, messages: decrypted });
+      dispatch({ type: reducerCases.SET_DECRYPTED_MESSAGES, decryptedMessage:decrypted });
+        // dispatch({ type: reducerCases.SET_DECRYPT_MESSAGES, encryptedMessages: decrypted });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     const getMessages = async () => {
-      const {
-        data: { messages },
-      } = await axios.get(
-        `${GET_MESSAGES_ROUTE}/${userInfo.id}/${currentChatUser.id}`
-      );
-      dispatch({ type: reducerCases.SET_MESSAGES, messages });
+      try {
+        const {
+          data: { messages },
+        } = await axios.get(
+          `${GET_MESSAGES_ROUTE}/${userInfo.id}/${currentChatUser.id}`
+        );
+        console.log(messages, userInfo, currentChatUser);
+        decryptMessages(messages);
+      } catch (error) {
+        console.error("Error fetching or decrypting messages:", error);
+      }
     };
+
+    if (currentChatUser?.id) {
+      getMessages();
+    }
+  },[currentChatUser,messages]);
+
+
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        const {
+          data: { messages },
+        } = await axios.get(
+          `${GET_MESSAGES_ROUTE}/${userInfo.id}/${currentChatUser.id}`
+        );
+        console.log(messages, userInfo, currentChatUser);
+        dispatch({ type: reducerCases.SET_MESSAGES, messages: messages });
+      } catch (error) {
+        console.error("Error fetching or decrypting messages:", error);
+      }
+    };
+
     if (currentChatUser?.id) {
       getMessages();
     }
   }, [currentChatUser]);
+
 
   useEffect(() => {
     if (userInfo) {
@@ -63,12 +141,14 @@ function Main() {
   useEffect(() => {
     if (socket.current && !socketEvent) {
       socket.current.on("msg-receiver", (data) => {
+        console.log("socket.........................");
         dispatch({
           type: reducerCases.ADD_MESSAGE,
           newMessage: {
             ...data.message,
           },
         });
+        // getMessages();
       });
 
       socket.current.on("incoming-voice-call", ({ from, roomId, callType }) => {
@@ -117,6 +197,7 @@ function Main() {
           email,
           profilePicture: profileImage,
           status,
+          publicKey,
         } = data.data;
         dispatch({
           type: reducerCases.SET_USER_INFO,
@@ -126,6 +207,7 @@ function Main() {
             email,
             profileImage,
             status,
+            publicKey,
           },
         });
       }

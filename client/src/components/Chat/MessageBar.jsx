@@ -66,26 +66,36 @@ function MessageBar() {
       const secretKey = nanoid();
       const cipherMessage = CryptoJS.AES.encrypt(message, secretKey).toString();
 
-      const encrypted = await EthCrypto.encryptWithPublicKey(
-        Buffer.from(currentChatUser?.publicKey.slice(2), "hex"),
-        // currentChatUser?.publicKey,
+      const encryptedReceiverKey = await EthCrypto.encryptWithPublicKey(
+        currentChatUser?.publicKey,
         secretKey
       );
-      const encryptedSecretKey = EthCrypto.cipher.stringify(encrypted); 
+      const encryptedReceiverSecretKey =
+        EthCrypto.cipher.stringify(encryptedReceiverKey);
+
+      const encryptedSenderKey = await EthCrypto.encryptWithPublicKey(
+        userInfo?.publicKey,
+        secretKey
+      );
+      const encryptedSenderSecretKey =
+        EthCrypto.cipher.stringify(encryptedSenderKey);
 
       const { data } = await axios.post(ADD_MESSAGE_ROUTE, {
         to: currentChatUser?.id,
         from: userInfo?.id,
         message: cipherMessage,
-        secretKey: encryptedSecretKey,
+        receiverSecretKey: encryptedReceiverSecretKey,
+        senderSecretKey: encryptedSenderSecretKey,
       });
 
       socket.current.emit("send-msg", {
         to: currentChatUser?.id,
         from: userInfo?.id,
         message: data.message,
-        secretKey: data.encryptedSecretKey,
+        receiverSecretKey: data.encryptedReceiverSecretKey,
+        senderSecretKey: data.encryptedSenderSecretKey,
       });
+
       dispatch({
         type: reducerCases.ADD_MESSAGE,
         newMessage: {
@@ -93,26 +103,8 @@ function MessageBar() {
         },
         fromSelf: true,
       });
+     
       setMessage("");
-
-      // const { data } = await axios.post(ADD_MESSAGE_ROUTE, {
-      //   to: currentChatUser?.id,
-      //   from: userInfo?.id,
-      //   message,
-      // });
-      // socket.current.emit("send-msg", {
-      //   to: currentChatUser?.id,
-      //   from: userInfo?.id,
-      //   message: data.message,
-      // });
-      // dispatch({
-      //   type: reducerCases.ADD_MESSAGE,
-      //   newMessage: {
-      //     ...data.message,
-      //   },
-      //   fromSelf: true,
-      // });
-      // setMessage("");
     } catch (error) {
       console.log(error);
     }
@@ -188,19 +180,7 @@ function MessageBar() {
                 title="Send Message"
                 onClick={sendMessage}
               />
-              {/* {message.length ? (
-                <MdSend
-                  className="text-panel-header-icon cursor-pointer text-xl"
-                  title="Send Message"
-                  onClick={sendMessage}
-                />
-              ) : (
-                <FaMicrophone
-                  className="text-panel-header-icon cursor-pointer text-xl"
-                  title="Record"
-                  onClick={() => setShowAudioRecorder(true)}
-                />
-              )} */}
+            
             </button>
           </div>
         </>
