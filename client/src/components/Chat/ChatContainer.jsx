@@ -5,7 +5,8 @@ import MessageStatus from "../common/MessageStatus";
 import ImageMessage from "./ImageMessage";
 
 function ChatContainer() {
-  const [{ messages, userInfo, currentChatUser ,decryptedMessage}] = useStateProvider();
+  const [{ messages, userInfo, currentChatUser, decryptedMessage }] =
+    useStateProvider();
 
   return (
     <div className="h-[80vh] w-full relative flex-grow overflow-auto custom-scrollbar">
@@ -14,7 +15,6 @@ function ChatContainer() {
         <div className="flex w-full">
           <div className="flex flex-col justify-end w-full gap-1 overflow-auto">
             {decryptedMessage.map((message, index) => {
-
               return (
                 <div
                   key={message?.id}
@@ -52,6 +52,7 @@ function ChatContainer() {
                   )}
                   {message?.type === "image" && (
                     <ImageMessage message={message} />
+                    
                   )}
                 </div>
               );
@@ -59,6 +60,7 @@ function ChatContainer() {
           </div>
         </div>
       </div>
+     
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useStateProvider } from "@/context/StateContext";
 import { reducerCases } from "@/context/constants";
-import { ADD_IMAGE_MESSAGE_ROUTE, ADD_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
+import {  ADD_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
+// ADD_IMAGE_MESSAGE_ROUTE,
 import axios from "axios";
 import EmojiPicker from "emoji-picker-react";
 import React, { useEffect, useState, useRef } from "react";
@@ -28,34 +29,160 @@ function MessageBar() {
     setMessage((prevMessage) => prevMessage + emojiObj.emoji);
   };
 
+  // const photoPickerChange = async (e) => {
+  //   try {
+  //     const file = e.target.files[0];
+  //     const formData = new FormData();
+  //     formData.append("image", file);
+  //     const response = await axios.post(ADD_IMAGE_MESSAGE_ROUTE, formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //       params: {
+  //         from: userInfo.id,
+  //         to: currentChatUser.id,
+  //       },
+  //     });
+  //     if (response.status === 201) {
+  //       socket.current.emit("send-msg", {
+  //         to: currentChatUser?.id,
+  //         from: userInfo?.id,
+  //         message: response.data.message,
+  //       });
+  //       dispatch({
+  //         type: reducerCases.ADD_MESSAGE,
+  //         newMessage: {
+  //           ...response.data.message,
+  //         },
+  //         fromSelf: true,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  
+  const resizeAndCompressImage = async (file, maxWidth, maxHeight, quality) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+  
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+  
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+  
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+  
+          canvas.toBlob(
+            (blob) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                const base64String = reader.result;
+                resolve(base64String);
+              };
+            },
+            file.type,
+            quality
+          );
+        };
+        img.onerror = (error) => {
+          reject(error);
+        };
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+  
+  
+
   const photoPickerChange = async (e) => {
     try {
+      // const file = e.target.files[0];
+      // var reader = new FileReader();
+      // reader.readAsDataURL(file);
+  
+      // reader.onload = async() => {
+      //   const base64=reader.result;
+      //  console.log("base64 ",base64);
+
       const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-      const response = await axios.post(ADD_IMAGE_MESSAGE_ROUTE, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        params: {
-          from: userInfo.id,
-          to: currentChatUser.id,
-        },
-      });
-      if (response.status === 201) {
-        socket.current.emit("send-msg", {
-          to: currentChatUser?.id,
-          from: userInfo?.id,
-          message: response.data.message,
-        });
-        dispatch({
-          type: reducerCases.ADD_MESSAGE,
-          newMessage: {
-            ...response.data.message,
-          },
-          fromSelf: true,
-        });
-      }
+      // var reader = new FileReader();
+      // reader.readAsDataURL(file);
+      const base64=await resizeAndCompressImage(file, 800, 600, 0.7);
+      // reader.onload = async() => {
+      //   const base64=reader.result;
+
+
+       const secretKey = nanoid();
+       const cipherMessage = CryptoJS.AES.encrypt(base64, secretKey).toString();
+    
+   
+       const encryptedReceiverKey = await EthCrypto.encryptWithPublicKey(
+         currentChatUser?.publicKey,
+         secretKey
+       );
+       const encryptedReceiverSecretKey =
+         EthCrypto.cipher.stringify(encryptedReceiverKey);
+ 
+       const encryptedSenderKey = await EthCrypto.encryptWithPublicKey(
+         userInfo?.publicKey,
+         secretKey
+       );
+       const encryptedSenderSecretKey =
+         EthCrypto.cipher.stringify(encryptedSenderKey);
+ 
+       const { data } = await axios.post(ADD_MESSAGE_ROUTE, {
+         to: currentChatUser?.id,
+         from: userInfo?.id,
+         message: cipherMessage,
+         type:"image",
+         receiverSecretKey: encryptedReceiverSecretKey,
+         senderSecretKey: encryptedSenderSecretKey,
+       });
+ 
+       socket.current.emit("send-msg", {
+         to: currentChatUser?.id,
+         from: userInfo?.id,
+         message: data.message,
+         receiverSecretKey: data.encryptedReceiverSecretKey,
+         senderSecretKey: data.encryptedSenderSecretKey,
+       });
+ 
+       dispatch({
+         type: reducerCases.ADD_MESSAGE,
+         newMessage: {
+           ...data.message,
+         },
+         fromSelf: true,
+       });
+      
+      // };
+      // reader.onerror = error => {
+      //   console.log("Error: ", error);
+      // };
+     
     } catch (error) {
       console.log(error);
     }
@@ -65,7 +192,7 @@ function MessageBar() {
     try {
       const secretKey = nanoid();
       const cipherMessage = CryptoJS.AES.encrypt(message, secretKey).toString();
-
+     
       const encryptedReceiverKey = await EthCrypto.encryptWithPublicKey(
         currentChatUser?.publicKey,
         secretKey

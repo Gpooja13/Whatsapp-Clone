@@ -22,6 +22,8 @@ function login() {
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    const data=await signInWithPopup(firebaseAuth, provider);
+    console.log(data.user);
     const {
       user: { displayName: name, email, photoURL: profileImage },
     } = await signInWithPopup(firebaseAuth, provider);

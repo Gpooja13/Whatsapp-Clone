@@ -3,12 +3,15 @@ import dotenv from "dotenv";
 import cors from "cors";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import MessageRoutes from "./routes/MessageRoutes.js";
+import bodyParser from 'body-parser'; 
 import { Server } from "socket.io";
 
 dotenv.config();
 const app = express();
 
 app.use(cors());
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.json());
 
 app.use("/uploads/images", express.static("uploads/images"));

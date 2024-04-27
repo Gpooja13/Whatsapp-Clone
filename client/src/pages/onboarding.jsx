@@ -7,7 +7,9 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { ONBOARD_USER_ROUTE } from "@/utils/ApiRoutes";
 import { reducerCases } from "@/context/constants";
-import EthCrypto from 'eth-crypto';
+import EthCrypto from "eth-crypto";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/utils/FirebaseConfig";
 
 function onboarding() {
   const router = useRouter();
@@ -28,14 +30,18 @@ function onboarding() {
     if (validateDetails()) {
       const email = userInfo.email;
       const { privateKey, publicKey } = EthCrypto.createIdentity();
-      localStorage.setItem("privateKey",privateKey);
+      const docRef = await addDoc(collection(db, "whatsapp-clone-data"), {
+        email:userInfo.email,
+        privateKey: privateKey,
+      });
+      
       try {
         const { data } = await axios.post(ONBOARD_USER_ROUTE, {
           email,
           name,
           about,
           image,
-          publicKey:publicKey,
+          publicKey: publicKey,
         });
 
         if (data.status) {
@@ -48,7 +54,7 @@ function onboarding() {
               email,
               profileImage: image,
               status: about,
-              publicKey: data.data.privateKey,
+              publicKey: data.data.publicKey,
             },
           });
 

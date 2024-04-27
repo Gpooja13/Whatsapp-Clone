@@ -4,7 +4,8 @@ import Empty from "./Empty";
 import { useRouter } from "next/router";
 import { useStateProvider } from "@/context/StateContext";
 import { onAuthStateChanged } from "firebase/auth";
-import { firebaseAuth } from "@/utils/FirebaseConfig";
+import { firebaseAuth, db } from "@/utils/FirebaseConfig";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import axios from "axios";
 import { reducerCases } from "@/context/constants";
 import { CHECK_USER_ROUTE, GET_MESSAGES_ROUTE, HOST } from "@/utils/ApiRoutes";
@@ -36,25 +37,43 @@ function Main() {
   const [redirectLogin, setRedirectLogin] = useState(false);
   const socket = useRef();
   const [socketEvent, setSocketEvent] = useState(false);
-  // const privateKey =localStorage.getItem("privateKey");
-  const privateKey =
-    "0xf17634ebbc134ab46dab039fcd49b551c443b1093ec106861a0c0cc9c77b6f85";
+  const [privateKey, setPrivateKey] = useState("");
+
+  useEffect(() => {
+    if (userInfo) {
+      const fetchPrivateKey = async () => {
+        const q = query(
+          collection(db, "whatsapp-clone-data"),
+          where("email", "==", userInfo.email)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          const privateKeyFromDoc = doc.data().privateKey;
+          setPrivateKey(privateKeyFromDoc);
+          console.log(`${doc.id} => ${privateKeyFromDoc}`);
+        });
+      };
+      fetchPrivateKey();
+    }
+  }, [userInfo]);
 
   useEffect(() => {
     if (redirectLogin) router.push("/login");
   }, [redirectLogin]);
 
   const decryptChat = async (secretKey, message) => {
-    console.log("privateKey ", privateKey);
+    console.log("1message ", message);
     try {
       const decryptedSecretKey = await EthCrypto.decryptWithPrivateKey(
         privateKey,
         secretKey
       );
+      console.log("decry1 ", decryptedSecretKey);
       const decryptedMessage = CryptoJS.AES.decrypt(
         message,
         decryptedSecretKey
       ).toString(CryptoJS.enc.Utf8);
+      console.log("decry2 ", decryptedMessage);
 
       return decryptedMessage;
     } catch (error) {
@@ -80,9 +99,11 @@ function Main() {
         }
       });
       const decrypted = await Promise.all(decryptedMessages);
-      // dispatch({ type: reducerCases.SET_MESSAGES, messages: decrypted });
-      dispatch({ type: reducerCases.SET_DECRYPTED_MESSAGES, decryptedMessage:decrypted });
-        // dispatch({ type: reducerCases.SET_DECRYPT_MESSAGES, encryptedMessages: decrypted });
+      dispatch({
+        type: reducerCases.SET_DECRYPTED_MESSAGES,
+        decryptedMessage: decrypted,
+      });
+      console.log(decrypted);
     } catch (error) {
       console.log(error);
     }
@@ -106,8 +127,7 @@ function Main() {
     if (currentChatUser?.id) {
       getMessages();
     }
-  },[currentChatUser,messages]);
-
+  }, [currentChatUser, messages]);
 
   useEffect(() => {
     const getMessages = async () => {
@@ -117,7 +137,7 @@ function Main() {
         } = await axios.get(
           `${GET_MESSAGES_ROUTE}/${userInfo.id}/${currentChatUser.id}`
         );
-        console.log(messages, userInfo, currentChatUser);
+
         dispatch({ type: reducerCases.SET_MESSAGES, messages: messages });
       } catch (error) {
         console.error("Error fetching or decrypting messages:", error);
@@ -128,7 +148,6 @@ function Main() {
       getMessages();
     }
   }, [currentChatUser]);
-
 
   useEffect(() => {
     if (userInfo) {
@@ -148,7 +167,6 @@ function Main() {
             ...data.message,
           },
         });
-        // getMessages();
       });
 
       socket.current.on("incoming-voice-call", ({ from, roomId, callType }) => {
