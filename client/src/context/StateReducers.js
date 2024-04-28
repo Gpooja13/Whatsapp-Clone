@@ -2,6 +2,7 @@ import { reducerCases } from "./constants";
 
 export const initialState = {
   userInfo: undefined,
+  privateKey:undefined,
   newUser: false,
   contactsPage: false,
   currentChatUser: undefined,
@@ -25,6 +26,11 @@ const reducer = (state, action) => {
       return {
         ...state,
         userInfo: action.userInfo,
+      };
+      case reducerCases.SET_PRIVATE_KEY:
+      return {
+        ...state,
+        privateKey: action.privateKey,
       };
     case reducerCases.SET_NEW_USER:
       return {

@@ -24,6 +24,7 @@ function Main() {
   const [
     {
       userInfo,
+      privateKey,
       currentChatUser,
       messages,
       messagesSearch,
@@ -37,11 +38,12 @@ function Main() {
   const [redirectLogin, setRedirectLogin] = useState(false);
   const socket = useRef();
   const [socketEvent, setSocketEvent] = useState(false);
-  const [privateKey, setPrivateKey] = useState("");
+  // const [privateKey, setPrivateKey] = useState("");
 
   useEffect(() => {
     if (userInfo) {
       const fetchPrivateKey = async () => {
+       
         const q = query(
           collection(db, "whatsapp-clone-data"),
           where("email", "==", userInfo.email)
@@ -49,8 +51,11 @@ function Main() {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const privateKeyFromDoc = doc.data().privateKey;
-          setPrivateKey(privateKeyFromDoc);
-          console.log(`${doc.id} => ${privateKeyFromDoc}`);
+          // setPrivateKey(privateKeyFromDoc);
+          dispatch({
+            type: reducerCases.SET_PRIVATE_KEY,
+            privateKey:privateKeyFromDoc,
+          });
         });
       };
       fetchPrivateKey();
@@ -62,18 +67,17 @@ function Main() {
   }, [redirectLogin]);
 
   const decryptChat = async (secretKey, message) => {
-    console.log("1message ", message);
     try {
       const decryptedSecretKey = await EthCrypto.decryptWithPrivateKey(
         privateKey,
         secretKey
       );
-      console.log("decry1 ", decryptedSecretKey);
+      
       const decryptedMessage = CryptoJS.AES.decrypt(
         message,
         decryptedSecretKey
       ).toString(CryptoJS.enc.Utf8);
-      console.log("decry2 ", decryptedMessage);
+      
 
       return decryptedMessage;
     } catch (error) {
@@ -103,7 +107,7 @@ function Main() {
         type: reducerCases.SET_DECRYPTED_MESSAGES,
         decryptedMessage: decrypted,
       });
-      console.log(decrypted);
+    
     } catch (error) {
       console.log(error);
     }

@@ -139,6 +139,8 @@ export const getInitialContactswithMessages = async (req, res, next) => {
         createdAt,
         senderId,
         receiverId,
+        receiverSecretKey,
+        senderSecretKey,
       } = msg;
       if (!users.get(calculatedId)) {
         let user = {
@@ -149,6 +151,8 @@ export const getInitialContactswithMessages = async (req, res, next) => {
           createdAt,
           senderId,
           receiverId,
+          receiverSecretKey,
+        senderSecretKey,
         };
         if (isSender) {
           user = { ...user, ...msg.receiver, totalUnreadMessages: 0 };

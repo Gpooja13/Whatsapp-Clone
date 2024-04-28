@@ -9,7 +9,8 @@ import { reducerCases } from "@/context/constants";
 import ContextMenu from "../common/ContextMenu";
 
 function ChatHeader() {
-  const [{ currentChatUser, onlineUsers }, dispatch] = useStateProvider();
+  const [{ currentChatUser, onlineUsers, userInfo }, dispatch] =
+    useStateProvider();
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
   const [contextMenuCoordinates, setContextMenuCoordinates] = useState({
     x: 0,
@@ -67,14 +68,21 @@ function ChatHeader() {
         </div>
       </div>
       <div className="flex gap-6">
-        <MdCall
-          className="text-panel-header-icon cursor-pointer text-xl"
-          onClick={handleVoiceCall}
-        />
-        <IoVideocam
-          className="text-panel-header-icon cursor-pointer text-xl"
-          onClick={handleVideoCall}
-        />
+        {(userInfo.id !== currentChatUser.id) ? (
+          <>
+            <MdCall
+              className="text-panel-header-icon cursor-pointer text-xl"
+              onClick={handleVoiceCall}
+            />
+            <IoVideocam
+              className="text-panel-header-icon cursor-pointer text-xl"
+              onClick={handleVideoCall}
+            />
+          </>
+        ) : (
+          ""
+        )}
+
         <BiSearchAlt2
           className="text-panel-header-icon cursor-pointer text-xl"
           onClick={() => dispatch({ type: reducerCases.SET_MESSAGE_SEARCH })}

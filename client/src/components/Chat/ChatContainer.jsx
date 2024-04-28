@@ -1,12 +1,20 @@
 import { useStateProvider } from "@/context/StateContext";
 import { calculateTime } from "@/utils/CalculateTime";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import MessageStatus from "../common/MessageStatus";
 import ImageMessage from "./ImageMessage";
 
 function ChatContainer() {
   const [{ messages, userInfo, currentChatUser, decryptedMessage }] =
     useStateProvider();
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    // Scroll down when the component mounts or when new messages are received
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [decryptedMessage]); // Trigger effect when decryptedMessage changes
 
   return (
     <div className="h-[80vh] w-full relative flex-grow overflow-auto custom-scrollbar">
@@ -33,9 +41,6 @@ function ChatContainer() {
                       }`}
                     >
                       <span className="break-all">{message?.message}</span>
-
-                      {/* <span className="break-all">{decryptedMessage}</span> */}
-                      {/* <span className="break-all">{message.message}</span> */}
                       <div className="flex gap-1 items-end">
                         <span className="text-bubble-meta text-[11px] pt-1 min-w-fit">
                           {calculateTime(message?.createdAt)}
@@ -50,17 +55,15 @@ function ChatContainer() {
                       </div>
                     </div>
                   )}
-                  {message?.type === "image" && (
-                    <ImageMessage message={message} />
-                    
-                  )}
+                  {message?.type === "image" && <ImageMessage message={message} />}
                 </div>
               );
             })}
+            {/* Empty div for scrolling to bottom */}
+            <div ref={scrollRef}></div>
           </div>
         </div>
       </div>
-     
     </div>
   );
 }

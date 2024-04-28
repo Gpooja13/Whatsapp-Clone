@@ -5,8 +5,6 @@ import MessageStatus from "../common/MessageStatus";
 import { calculateTime } from "@/utils/CalculateTime";
 
 function ImageMessage({ message }) {
-  console.log(message);
-
   const [{ userInfo, currentChatUser }] = useStateProvider();
   return (
     <>
