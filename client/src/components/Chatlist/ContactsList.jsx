@@ -32,7 +32,7 @@ function ContactsList() {
         const {
           data: { users },
         } = await axios.get(GET_ALL_CONTACTS);
-        console.log(users);
+       
         setAllContacts(users);
         setSearchContacts(users);
       } catch (error) {

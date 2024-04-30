@@ -35,6 +35,26 @@ export const onBoardUser = async (req, res, next) => {
   }
 };
 
+export const updateUser = async (req, res, next) => {
+  try {
+    const { email, name, about, image: profilePicture } = req.body;
+    if (!email || !name) {
+      return res.send("Email, Name and Image are required!");
+    }
+    const prisma = getPrismaInstance();
+
+   const user= await prisma.user.update({
+      where: { email:email  },
+      data: { name: name, about: about ,profilePicture:profilePicture},
+     
+    });
+
+    return res.json({ msg: "Success", data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getAllUsers = async (req, res, next) => {
   try {
     const prisma = getPrismaInstance();

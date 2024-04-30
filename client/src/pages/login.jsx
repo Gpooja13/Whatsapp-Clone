@@ -23,7 +23,11 @@ function login() {
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
     const data=await signInWithPopup(firebaseAuth, provider);
-    console.log(data.user);
+    const uid=data.user.uid;
+    dispatch({
+      type: reducerCases.SET_GOOGLE_AUTH_KEY,
+      googleAuthKey: uid,
+    });
     const {
       user: { displayName: name, email, photoURL: profileImage },
     } = await signInWithPopup(firebaseAuth, provider);

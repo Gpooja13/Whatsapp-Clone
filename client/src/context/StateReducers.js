@@ -2,14 +2,16 @@ import { reducerCases } from "./constants";
 
 export const initialState = {
   userInfo: undefined,
-  privateKey:undefined,
+  privateKey: undefined,
+  googleAuthKey: undefined,
   newUser: false,
   contactsPage: false,
   currentChatUser: undefined,
   messages: [],
-  decryptedMessage:[],
+  decryptedMessage: [],
   socket: undefined,
   messagesSearch: false,
+  showProfile: false,
   userContacts: [],
   onlineUsers: [],
   filteredContacts: [],
@@ -27,10 +29,15 @@ const reducer = (state, action) => {
         ...state,
         userInfo: action.userInfo,
       };
-      case reducerCases.SET_PRIVATE_KEY:
+    case reducerCases.SET_PRIVATE_KEY:
       return {
         ...state,
         privateKey: action.privateKey,
+      };
+    case reducerCases.SET_GOOGLE_AUTH_KEY:
+      return {
+        ...state,
+        googleAuthKey: action.googleAuthKey,
       };
     case reducerCases.SET_NEW_USER:
       return {
@@ -71,6 +78,11 @@ const reducer = (state, action) => {
       return {
         ...state,
         messagesSearch: !state.messagesSearch,
+      };
+    case reducerCases.SET_PROFILE:
+      return {
+        ...state,
+        showProfile: !state.showProfile,
       };
     case reducerCases.SET_USERS_CONTACTS:
       return {

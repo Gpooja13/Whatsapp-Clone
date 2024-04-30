@@ -21,6 +21,7 @@ function ChatList() {
     <div className="bg-panel-header-background flex flex-col max-h-screen z-20">
       {pageType === "default" && (
         <>
+     
           <ChatListHeader />
           <SearchBar />
           <List />

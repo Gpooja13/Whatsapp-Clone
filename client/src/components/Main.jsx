@@ -18,6 +18,7 @@ import VideoCall from "./Call/VideoCall";
 import VoiceCall from "./Call/VoiceCall";
 import IncomingVideoCall from "./common/IncomingVideoCall";
 import IncomingCall from "./common/IncomingCall";
+import Profile from "./Chatlist/Profile";
 
 function Main() {
   const router = useRouter();
@@ -25,9 +26,11 @@ function Main() {
     {
       userInfo,
       privateKey,
+      googleAuthKey,
       currentChatUser,
       messages,
       messagesSearch,
+      showProfile,
       videoCall,
       voiceCall,
       incomingVoiceCall,
@@ -38,12 +41,25 @@ function Main() {
   const [redirectLogin, setRedirectLogin] = useState(false);
   const socket = useRef();
   const [socketEvent, setSocketEvent] = useState(false);
-  // const [privateKey, setPrivateKey] = useState("");
+  const chatAudioRef = useRef(null);
+  // const chatAudio=new Audio('facebookchat.mp3');
+
+  useEffect(() => {
+    // Initialize chat audio
+    chatAudioRef.current = new Audio('facebookchat.mp3');
+    console.log("playing");
+  }, []);
+
+  const playChatAudio = () => {
+    if (chatAudioRef.current) {
+      chatAudioRef.current.play();
+    }
+  };
+
 
   useEffect(() => {
     if (userInfo) {
       const fetchPrivateKey = async () => {
-       
         const q = query(
           collection(db, "whatsapp-clone-data"),
           where("email", "==", userInfo.email)
@@ -51,10 +67,15 @@ function Main() {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const privateKeyFromDoc = doc.data().privateKey;
-          // setPrivateKey(privateKeyFromDoc);
+     
+          const pk = CryptoJS.AES.decrypt(
+            privateKeyFromDoc,
+            googleAuthKey
+          ).toString(CryptoJS.enc.Utf8);
+        
           dispatch({
             type: reducerCases.SET_PRIVATE_KEY,
-            privateKey:privateKeyFromDoc,
+            privateKey: pk,
           });
         });
       };
@@ -67,17 +88,17 @@ function Main() {
   }, [redirectLogin]);
 
   const decryptChat = async (secretKey, message) => {
+  
     try {
       const decryptedSecretKey = await EthCrypto.decryptWithPrivateKey(
         privateKey,
         secretKey
       );
-      
+
       const decryptedMessage = CryptoJS.AES.decrypt(
         message,
         decryptedSecretKey
       ).toString(CryptoJS.enc.Utf8);
-      
 
       return decryptedMessage;
     } catch (error) {
@@ -107,7 +128,6 @@ function Main() {
         type: reducerCases.SET_DECRYPTED_MESSAGES,
         decryptedMessage: decrypted,
       });
-    
     } catch (error) {
       console.log(error);
     }
@@ -121,7 +141,7 @@ function Main() {
         } = await axios.get(
           `${GET_MESSAGES_ROUTE}/${userInfo.id}/${currentChatUser.id}`
         );
-        console.log(messages, userInfo, currentChatUser);
+
         decryptMessages(messages);
       } catch (error) {
         console.error("Error fetching or decrypting messages:", error);
@@ -131,7 +151,7 @@ function Main() {
     if (currentChatUser?.id) {
       getMessages();
     }
-  }, [currentChatUser, messages]);
+  }, [currentChatUser, messages,privateKey]);
 
   useEffect(() => {
     const getMessages = async () => {
@@ -165,6 +185,7 @@ function Main() {
     if (socket.current && !socketEvent) {
       socket.current.on("msg-receiver", (data) => {
         console.log("socket.........................");
+        playChatAudio(); 
         dispatch({
           type: reducerCases.ADD_MESSAGE,
           newMessage: {
@@ -206,9 +227,14 @@ function Main() {
   onAuthStateChanged(firebaseAuth, async (currentUser) => {
     if (!currentUser) setRedirectLogin(true);
     if (!userInfo && currentUser?.email) {
+      dispatch({
+        type: reducerCases.SET_GOOGLE_AUTH_KEY,
+        googleAuthKey: currentUser?.uid,
+      });
       const { data } = await axios.post(CHECK_USER_ROUTE, {
         email: currentUser.email,
       });
+  
       if (!data.status) {
         router.push("/login");
       }
@@ -218,7 +244,7 @@ function Main() {
           name,
           email,
           profilePicture: profileImage,
-          status,
+          about,
           publicKey,
         } = data.data;
         dispatch({
@@ -228,11 +254,13 @@ function Main() {
             name,
             email,
             profileImage,
-            status,
+            status:about,
             publicKey,
           },
         });
+       
       }
+
       router.push("/");
     }
   });
@@ -254,19 +282,22 @@ function Main() {
       )}
       {!videoCall && !voiceCall && (
         <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full">
-          <ChatList />
+        {showProfile?<Profile/>:<ChatList />}
+          {/* <ChatList /> */}
           {currentChatUser ? (
             <div
               className={messagesSearch ? "grid grid-cols-2" : "grid-cols-2"}
             >
               <Chat />
               {messagesSearch && <SearchMessages />}
+             
             </div>
           ) : (
             <Empty />
           )}
         </div>
       )}
+      
     </>
   );
 }

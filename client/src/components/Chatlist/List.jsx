@@ -8,7 +8,7 @@ import CryptoJS from "crypto-js";
 import EthCrypto from "eth-crypto";
 
 function List() {
-  const [{ userInfo, privateKey, userContacts, filteredContacts }, dispatch] =
+  const [{ userInfo, privateKey, userContacts, filteredContacts,messages}, dispatch] =
     useStateProvider();
 
   const decryptChat = async (secretKey, message) => {
@@ -32,13 +32,13 @@ function List() {
   const decryptMessages = async (messages) => {
     try {
       const decryptedMessages = messages.map(async (message) => {
-        if (message.senderId === userInfo.id) {
+        if (message.senderId === userInfo?.id) {
           const decryptedMessage = await decryptChat(
             message.senderSecretKey,
             message.message
           );
           return { ...message, message: decryptedMessage };
-        } else if (message.senderId === currentChatUser.id) {
+        } else  {
           const decryptedMessage = await decryptChat(
             message.receiverSecretKey,
             message.message
@@ -65,7 +65,7 @@ function List() {
       dispatch({ type: reducerCases.SET_ONLINE_USERS, onlineUsers });
       decryptMessages(users);
 
-      dispatch({ type: reducerCases.SET_USERS_CONTACTS, userContacts: users });
+      // dispatch({ type: reducerCases.SET_USERS_CONTACTS, userContacts: users });
     } catch (error) {
       console.log(error);
     }
@@ -75,7 +75,7 @@ function List() {
     if (userInfo?.id && privateKey) {
       getContacts();
     }
-  }, [userInfo, privateKey]);
+  }, [userInfo, privateKey,messages]);
 
   return (
     <div className="bg-search-input-container-background flex-auto overflow-auto max-h-full custom-scrollbar">

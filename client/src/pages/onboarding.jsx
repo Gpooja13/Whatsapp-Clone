@@ -8,12 +8,13 @@ import React, { useEffect, useState } from "react";
 import { ONBOARD_USER_ROUTE } from "@/utils/ApiRoutes";
 import { reducerCases } from "@/context/constants";
 import EthCrypto from "eth-crypto";
+import CryptoJS from "crypto-js";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/utils/FirebaseConfig";
 
 function onboarding() {
   const router = useRouter();
-  const [{ userInfo, newUser }, dispatch] = useStateProvider();
+  const [{ userInfo, newUser, googleAuthKey }, dispatch] = useStateProvider();
   const [name, setName] = useState(userInfo?.name || "");
   const [about, setAbout] = useState("");
   const [image, setImage] = useState("/default_avatar.png");
@@ -30,11 +31,12 @@ function onboarding() {
     if (validateDetails()) {
       const email = userInfo.email;
       const { privateKey, publicKey } = EthCrypto.createIdentity();
+      const pk = CryptoJS.AES.encrypt(privateKey, googleAuthKey).toString();
       const docRef = await addDoc(collection(db, "whatsapp-clone-data"), {
-        email:userInfo.email,
-        privateKey: privateKey,
+        email: userInfo.email,
+        privateKey: pk,
       });
-      
+
       try {
         const { data } = await axios.post(ONBOARD_USER_ROUTE, {
           email,

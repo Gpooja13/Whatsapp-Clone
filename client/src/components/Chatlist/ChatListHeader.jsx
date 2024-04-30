@@ -36,7 +36,10 @@ function ChatListHeader() {
   };
   return (
     <div className="h-16 px-4 py-3 flex justify-between items-center">
-      <div className="cursor-pointer">
+      <div
+        className="cursor-pointer"
+        onClick={() => dispatch({ type: reducerCases.SET_PROFILE })}
+      >
         <Avatar type="sm" image={userInfo?.profileImage} />
       </div>
       <div className="flex gap-6">
@@ -49,17 +52,17 @@ function ChatListHeader() {
           <BsThreeDotsVertical
             className="text-panel-header-icon cursor-pointer text-xl"
             title="Menu"
-            onClick={(e)=>showContextMenu(e)}
+            onClick={(e) => showContextMenu(e)}
             id="context-opener"
           />
-           {isContextMenuVisible && (
-          <ContextMenu
-            options={contextMenuOptions}
-            coordinates={contextMenuCoordinates}
-            contextMenu={isContextMenuVisible}
-            setContextMenu={setIsContextMenuVisible}
-          />
-        )}
+          {isContextMenuVisible && (
+            <ContextMenu
+              options={contextMenuOptions}
+              coordinates={contextMenuCoordinates}
+              contextMenu={isContextMenuVisible}
+              setContextMenu={setIsContextMenuVisible}
+            />
+          )}
         </>
       </div>
     </div>
