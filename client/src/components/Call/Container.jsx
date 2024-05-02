@@ -128,10 +128,19 @@ function Container({ data, stopCallAudio }) {
     const id = data.id;
 
     if (zgVar && localStream && publishStream) {
+      localStream.getTracks().forEach(track => {
+        track.stop();
+      });
+
       zgVar.destroyStream(localStream);
       zgVar.stopPublishingStream(publishStream);
+      // zgVar.stopPlayingStream(publishStream);
       zgVar.logoutRoom(data.roomId.toString());
     }
+
+    // localStream.getTracks().forEach(track => {
+    //   track.stop();
+    // });
  
     if (data.callType === "voice") {
       socket.current.emit("reject-voice-call", { from: id });
