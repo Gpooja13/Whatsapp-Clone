@@ -26,14 +26,14 @@ function PhotoLibrary({ setImage, hidePhotoLibrary }) {
         <div className="grid grid-cols-3 justify-center items-center gap-6 p-20 w-full">
           {images.map((image, index) => {
             return (
-              <div
+              <div key={index}
                 onClick={() => {
                   setImage(images[index]);
                   hidePhotoLibrary(false);
                 }}
               >
                 <div className="w-24 h-24 cursor-pointer relative">
-                  <Image src={image} alt="avatar" fill />
+                  <Image src={image} alt="avatar" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                 </div>
               </div>
             );

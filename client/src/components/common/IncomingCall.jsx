@@ -3,10 +3,11 @@ import { reducerCases } from "@/context/constants";
 import Image from "next/image";
 import React from "react";
 
-function IncomingCall() {
+function IncomingCall({ stopCallAudio }) {
   const [{ incomingVoiceCall, socket }, dispatch] = useStateProvider();
 
   const acceptCall = () => {
+    stopCallAudio();
     dispatch({
       type: reducerCases.SET_VOICE_CALL,
       voiceCall: { ...incomingVoiceCall, type: "in-coming" },
@@ -18,7 +19,8 @@ function IncomingCall() {
     });
   };
   const rejectCall = () => {
-    socket.current.emit("reject-Voice-call", { from: incomingVoiceCall.id });
+    stopCallAudio();
+    socket.current.emit("reject-voice-call", { from: incomingVoiceCall.id });
     dispatch({ type: reducerCases.END_CALL });
   };
 

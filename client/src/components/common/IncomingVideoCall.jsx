@@ -3,10 +3,11 @@ import { reducerCases } from "@/context/constants";
 import Image from "next/image";
 import React from "react";
 
-function IncomingVideoCall() {
-  const [{ incomingVideoCall ,socket}, dispatch] = useStateProvider();
+function IncomingVideoCall({ stopCallAudio }) {
+  const [{ incomingVideoCall, socket }, dispatch] = useStateProvider();
 
   const acceptCall = () => {
+    stopCallAudio();
     dispatch({
       type: reducerCases.SET_VIDEO_CALL,
       videoCall: { ...incomingVideoCall, type: "in-coming" },
@@ -18,6 +19,7 @@ function IncomingVideoCall() {
     });
   };
   const rejectCall = () => {
+    stopCallAudio();
     socket.current.emit("reject-video-call", { from: incomingVideoCall.id });
     dispatch({ type: reducerCases.END_CALL });
   };

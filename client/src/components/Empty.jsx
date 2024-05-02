@@ -4,7 +4,7 @@ import React from "react";
 function Empty() {
   return (
     <div className="border-conversation-border border-l w-full bg-panel bg-panel-header-background flex flex-col h-[100vh] border-b-4 border-b-icon-green items-center justify-center">
-      <Image src="/whatsapp.gif" alt="whatsapp" height={200} width={200} />
+      <Image src="/whatsapp.gif" alt="whatsapp" priority={true} height={200} width={200} />
     </div>
   );
 }

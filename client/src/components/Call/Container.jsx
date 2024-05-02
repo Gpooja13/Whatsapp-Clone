@@ -6,8 +6,8 @@ import { reducerCases } from "@/context/constants";
 import axios from "axios";
 import { GET_CALL_TOKEN } from "@/utils/ApiRoutes";
 
-function Container({ data }) {
-  const [{ videoCall, socket, userInfo }, dispatch] = useStateProvider();
+function Container({ data, stopCallAudio }) {
+  const [{ socket, userInfo }, dispatch] = useStateProvider();
   const [callAccepted, setCallAccepted] = useState(false);
   const [token, setToken] = useState(undefined);
   const [zgVar, setZgVar] = useState(undefined);
@@ -16,7 +16,9 @@ function Container({ data }) {
 
   useEffect(() => {
     if (data.type === "out-going")
-      socket.current.on("accept-call", () => setCallAccepted(true));
+      socket.current.on("accept-call", () => {
+        setCallAccepted(true);
+      });
     else {
       setTimeout(() => {
         setCallAccepted(true);
@@ -42,6 +44,7 @@ function Container({ data }) {
     const startCall = async () => {
       import("zego-express-engine-webrtc").then(
         async ({ ZegoExpressEngine }) => {
+          stopCallAudio();
           const zg = new ZegoExpressEngine(
             process.env.NEXT_PUBLIC_ZEGO_APP_ID,
             process.env.NEXT_PUBLIC_ZEGO_SERVER_ID
@@ -121,12 +124,15 @@ function Container({ data }) {
   }, [token]);
 
   const endCall = () => {
+    stopCallAudio();
     const id = data.id;
+
     if (zgVar && localStream && publishStream) {
       zgVar.destroyStream(localStream);
       zgVar.stopPublishingStream(publishStream);
       zgVar.logoutRoom(data.roomId.toString());
     }
+ 
     if (data.callType === "voice") {
       socket.current.emit("reject-voice-call", { from: id });
     } else {

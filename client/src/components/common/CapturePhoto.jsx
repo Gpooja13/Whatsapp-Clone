@@ -36,7 +36,7 @@ function CapturePhoto({ setImage, hideCapturePhoto }) {
           <IoClose className="h-10 w-10 cursor-pointer" />
         </div>
         <div className="flex justify-center">
-          <video id="video" width="400" autoplay ref={videoRef}></video>
+          <video id="video" width="400" height="800" autoPlay playsInline ref={videoRef}></video>
         </div>
         <button
           className="h-16 w-16 bg-white rounded-full cursor-pointer border-8 border-teal-light p-2 mb-10"

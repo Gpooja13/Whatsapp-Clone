@@ -6,14 +6,14 @@ import { BiSearchAlt2 } from "react-icons/bi";
 import { calculateTime } from "@/utils/CalculateTime";
 
 function SearchMessages() {
-  const [{ currentChatUser, messages }, dispatch] = useStateProvider();
+  const [{ currentChatUser, messages,decryptedMessage }, dispatch] = useStateProvider();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchedMessages, setSearchedMessages] = useState([]);
 
   useEffect(() => {
     if (searchTerm) {
       setSearchedMessages(
-        messages.filter(
+        decryptedMessage.filter(
           (message) =>
             message.type === "text" && message.message.includes(searchTerm)
         )
@@ -29,6 +29,7 @@ function SearchMessages() {
         <IoClose
           className="cursor-pointer text-icon-lighter text-2xl"
           onClick={() => dispatch({ type: reducerCases.SET_MESSAGE_SEARCH })}
+          title="Close"
         />
         <span>Search Messages</span>
       </div>

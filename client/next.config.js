@@ -2,8 +2,9 @@
 const nextConfig = {
   reactStrictMode: false,
   env: {
-    NEXT_PUBLIC_ZEGO_APP_ID: 581296753,
-    NEXT_PUBLIC_ZEGO_SERVER_ID: "ea42d2a104a27b81eab96d2b0737cdf8",
+    NEXT_PUBLIC_ZEGO_APP_ID:1369726402,
+    NEXT_PUBLIC_ZEGO_SERVER_ID: "13338a91e17fe69b02c0c8440d114d8d",
+    HOST:"http://localhost:3005",
   },
   images: {
     domains: ["localhost"],

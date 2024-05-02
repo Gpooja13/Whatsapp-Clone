@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect } from "react";
 const Container = dynamic(() => import("./Container"), { ssr: false });
 
-function VoiceCall() {
+function VoiceCall({stopCallAudio}) {
   const [{ voiceCall, socket, userInfo }] = useStateProvider();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ function VoiceCall() {
     }
   }, [voiceCall]);
 
-  return <Container data={voiceCall} />;
+  return <Container data={voiceCall} stopCallAudio={stopCallAudio} />;
 }
 
 export default VoiceCall;

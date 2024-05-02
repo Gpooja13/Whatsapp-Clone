@@ -68,6 +68,7 @@ const Profile = () => {
         <IoClose
           className="cursor-pointer text-icon-lighter text-2xl"
           onClick={() => dispatch({ type: reducerCases.SET_PROFILE })}
+          title="Close"
         />
       </div>
       <div className="flex flex-col h-full bg-search-input-container-background">

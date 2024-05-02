@@ -78,15 +78,15 @@ function Avatar({ type, image, setImage }) {
 
   return (
     <>
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center relative">
         {type === "sm" && (
           <div className="relative h-10 w-10">
-            <Image src={image} alt="avatar" className="rounded-full" fill />
+            <Image src={image?`${image}`:`/default_avatar.png`} alt="avatar" className="rounded-full" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
           </div>
         )}
         {type === "lg" && (
           <div className="relative h-14 w-14">
-            <Image src={image} alt="avatar" className="rounded-full" fill />
+            <Image src={image?`${image}`:`/default_avatar.png`} alt="avatar" className="rounded-full" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
           </div>
         )}
         {type === "xl" && (
@@ -112,7 +112,7 @@ function Avatar({ type, image, setImage }) {
               </span>
             </div>
             <div className="h-48 w-48 ">
-              <Image src={image} alt="avatar" className="rounded-full" fill />
+              <Image src={image?`${image}`:`/default_avatar.png`} alt="avatar" className="rounded-full" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
             </div>
           </div>
         )}

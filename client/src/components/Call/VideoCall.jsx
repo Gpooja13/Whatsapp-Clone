@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect } from "react";
 const Container = dynamic(() => import("./Container"), { ssr: false });
 
-function VideoCall() {
+function VideoCall({stopCallAudio}) {
   const [{ videoCall, socket, userInfo }] = useStateProvider();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ function VideoCall() {
     }
   }, [videoCall]);
 
-  return <Container data={videoCall} />;
+  return <Container data={videoCall} stopCallAudio={stopCallAudio}/>;
 }
 
 export default VideoCall;

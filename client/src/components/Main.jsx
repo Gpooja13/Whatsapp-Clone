@@ -42,12 +42,12 @@ function Main() {
   const socket = useRef();
   const [socketEvent, setSocketEvent] = useState(false);
   const chatAudioRef = useRef(null);
-  // const chatAudio=new Audio('facebookchat.mp3');
+  const callAudioRef = useRef(null);
 
   useEffect(() => {
     // Initialize chat audio
-    chatAudioRef.current = new Audio('facebookchat.mp3');
-    console.log("playing");
+    chatAudioRef.current = new Audio("facebookchat.mp3");
+    callAudioRef.current = new Audio("call-sound.mp3");
   }, []);
 
   const playChatAudio = () => {
@@ -56,6 +56,18 @@ function Main() {
     }
   };
 
+  const playCallAudio = () => {
+    if (callAudioRef.current) {
+      callAudioRef.current.play();
+    }
+  };
+
+  const stopCallAudio = () => {
+    if (callAudioRef.current) {
+      callAudioRef.current.pause();
+      callAudioRef.current.currentTime = 0;
+    }
+  };
 
   useEffect(() => {
     if (userInfo) {
@@ -67,12 +79,12 @@ function Main() {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const privateKeyFromDoc = doc.data().privateKey;
-     
+
           const pk = CryptoJS.AES.decrypt(
             privateKeyFromDoc,
             googleAuthKey
           ).toString(CryptoJS.enc.Utf8);
-        
+
           dispatch({
             type: reducerCases.SET_PRIVATE_KEY,
             privateKey: pk,
@@ -88,7 +100,6 @@ function Main() {
   }, [redirectLogin]);
 
   const decryptChat = async (secretKey, message) => {
-  
     try {
       const decryptedSecretKey = await EthCrypto.decryptWithPrivateKey(
         privateKey,
@@ -151,7 +162,7 @@ function Main() {
     if (currentChatUser?.id) {
       getMessages();
     }
-  }, [currentChatUser, messages,privateKey]);
+  }, [currentChatUser, messages, privateKey]);
 
   useEffect(() => {
     const getMessages = async () => {
@@ -185,7 +196,7 @@ function Main() {
     if (socket.current && !socketEvent) {
       socket.current.on("msg-receiver", (data) => {
         console.log("socket.........................");
-        playChatAudio(); 
+        playChatAudio();
         dispatch({
           type: reducerCases.ADD_MESSAGE,
           newMessage: {
@@ -195,6 +206,7 @@ function Main() {
       });
 
       socket.current.on("incoming-voice-call", ({ from, roomId, callType }) => {
+        playCallAudio();
         dispatch({
           type: reducerCases.SET_INCOMING_VOICE_CALL,
           incomingVoiceCall: { ...from, roomId, callType },
@@ -202,6 +214,7 @@ function Main() {
       });
 
       socket.current.on("incoming-video-call", ({ from, roomId, callType }) => {
+        playCallAudio();
         dispatch({
           type: reducerCases.SET_INCOMING_VIDEO_CALL,
           incomingVideoCall: { ...from, roomId, callType },
@@ -209,10 +222,13 @@ function Main() {
       });
 
       socket.current.on("voice-call-rejected", () => {
+        stopCallAudio();
         dispatch({ type: reducerCases.END_CALL });
+        
       });
 
       socket.current.on("video-call-rejected", () => {
+        stopCallAudio();
         dispatch({ type: reducerCases.END_CALL });
       });
 
@@ -234,7 +250,7 @@ function Main() {
       const { data } = await axios.post(CHECK_USER_ROUTE, {
         email: currentUser.email,
       });
-  
+
       if (!data.status) {
         router.push("/login");
       }
@@ -254,11 +270,10 @@ function Main() {
             name,
             email,
             profileImage,
-            status:about,
+            status: about,
             publicKey,
           },
         });
-       
       }
 
       router.push("/");
@@ -267,22 +282,22 @@ function Main() {
 
   return (
     <>
-      {incomingVideoCall && <IncomingVideoCall />}
-      {incomingVoiceCall && <IncomingCall />}
+      {incomingVideoCall && <IncomingVideoCall stopCallAudio={stopCallAudio} />}
+      {incomingVoiceCall && <IncomingCall stopCallAudio={stopCallAudio} />}
 
       {videoCall && (
         <div className="h-screen w-screen max-h-full overflow-hidden">
-          <VideoCall />
+          <VideoCall stopCallAudio={stopCallAudio} />
         </div>
       )}
       {voiceCall && (
         <div className="h-screen w-screen max-h-full overflow-hidden">
-          <VoiceCall />
+          <VoiceCall stopCallAudio={stopCallAudio} />
         </div>
       )}
       {!videoCall && !voiceCall && (
         <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full">
-        {showProfile?<Profile/>:<ChatList />}
+          {showProfile ? <Profile /> : <ChatList />}
           {/* <ChatList /> */}
           {currentChatUser ? (
             <div
@@ -290,14 +305,12 @@ function Main() {
             >
               <Chat />
               {messagesSearch && <SearchMessages />}
-             
             </div>
           ) : (
             <Empty />
           )}
         </div>
       )}
-      
     </>
   );
 }
