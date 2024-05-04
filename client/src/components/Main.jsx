@@ -240,45 +240,91 @@ function Main() {
     }
   }, [socket.current]);
 
-  onAuthStateChanged(firebaseAuth, async (currentUser) => {
-    if (!currentUser) setRedirectLogin(true);
-    if (!userInfo && currentUser?.email) {
-      dispatch({
-        type: reducerCases.SET_GOOGLE_AUTH_KEY,
-        googleAuthKey: currentUser?.uid,
-      });
-      const { data } = await axios.post(CHECK_USER_ROUTE, {
-        email: currentUser.email,
-      });
 
-      if (!data.status) {
-        router.push("/login");
-      }
-      if (data?.data) {
-        const {
-          id,
-          name,
-          email,
-          profilePicture: profileImage,
-          about,
-          publicKey,
-        } = data.data;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (currentUser) => {
+      if (!currentUser) setRedirectLogin(true);
+      if (!userInfo && currentUser?.email) {
         dispatch({
-          type: reducerCases.SET_USER_INFO,
-          userInfo: {
+          type: reducerCases.SET_GOOGLE_AUTH_KEY,
+          googleAuthKey: currentUser?.uid,
+        });
+        const { data } = await axios.post(CHECK_USER_ROUTE, {
+          email: currentUser.email,
+        });
+  
+        if (!data.status) {
+          router.push("/login");
+        }
+        if (data?.data) {
+          const {
             id,
             name,
             email,
-            profileImage,
-            status: about,
+            profilePicture: profileImage,
+            about,
             publicKey,
-          },
-        });
+          } = data.data;
+          dispatch({
+            type: reducerCases.SET_USER_INFO,
+            userInfo: {
+              id,
+              name,
+              email,
+              profileImage,
+              status: about,
+              publicKey,
+            },
+          });
+        }
+  
+        router.push("/");
       }
+    });
+  
+    // Cleanup function to unsubscribe from listener on component unmount
+    return () => unsubscribe();
+  }, [firebaseAuth]); // Add firebaseAuth as a dependency
 
-      router.push("/");
-    }
-  });
+  // onAuthStateChanged(firebaseAuth, async (currentUser) => {
+  //   if (!currentUser) setRedirectLogin(true);
+  //   if (!userInfo && currentUser?.email) {
+  //     dispatch({
+  //       type: reducerCases.SET_GOOGLE_AUTH_KEY,
+  //       googleAuthKey: currentUser?.uid,
+  //     });
+  //     const { data } = await axios.post(CHECK_USER_ROUTE, {
+  //       email: currentUser.email,
+  //     });
+
+  //     if (!data.status) {
+  //       router.push("/login");
+  //     }
+  //     if (data?.data) {
+  //       const {
+  //         id,
+  //         name,
+  //         email,
+  //         profilePicture: profileImage,
+  //         about,
+  //         publicKey,
+  //       } = data.data;
+  //       dispatch({
+  //         type: reducerCases.SET_USER_INFO,
+  //         userInfo: {
+  //           id,
+  //           name,
+  //           email,
+  //           profileImage,
+  //           status: about,
+  //           publicKey,
+  //         },
+  //       });
+  //     }
+
+  //     router.push("/");
+  //   }
+  // });
 
   return (
     <>
