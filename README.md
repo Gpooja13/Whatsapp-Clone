@@ -53,6 +53,7 @@ Check out demo video here: [Demo video](https://res.cloudinary.com/cloudtrial/vi
 - Tailwind CSS - (Utility-first CSS framework)
 - Express - (Node.js framework for building the backend API)
 - ZegoCloud - (Voice and video calling service integration)
+- PostgreSQL - (Relational database management system)
 
 ## Prerequisites
 
@@ -61,6 +62,7 @@ Before running the project, make sure you have the following installed:
 - Node.js
 - npm (Node Package Manager): Should be installed with Node.js
 - Firebase account and project setup
+- PostgreSQL database setup
 
 ## Getting Started
 
