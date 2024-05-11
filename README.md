@@ -5,7 +5,7 @@
 
 This project is a modern, feature-rich WhatsApp clone built with Next.js, offering a seamless messaging experience with voice and video calling capabilities.
 
-This project aims to replicate the core functionality of the popular messaging application while also providing seamless voice and video calling capabilities.
+This project aims to replicate the core functionality of the popular messaging application while also providing end to end encryption and seamless voice & video calling capabilities.
 
 ## Features
 
