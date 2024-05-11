@@ -22,7 +22,7 @@ This project aims to replicate the core functionality of the popular messaging a
 
 ## Demo
 
-The E-commerce website can be viewed online here:
+The messenger website can be viewed online here:
 https://whatsapp-clone-peach-nine.vercel.app
 
 Check out demo video here: [Demo video](https://res.cloudinary.com/cloudtrial/video/upload/v1715411726/InShot_20240510_130024063_qgchjr.mp4)
@@ -49,11 +49,12 @@ Check out demo video here: [Demo video](https://res.cloudinary.com/cloudtrial/vi
 - Next.js (React framework for server-rendered and statically generated pages)
 - React (JavaScript library for building user interfaces)
 - Firebase - (Platform for Providing authentication)
+- PostgreSQL - (Relational database management system)
 - Socket.io - (Real-time communication library)
 - Tailwind CSS - (Utility-first CSS framework)
 - Express - (Node.js framework for building the backend API)
 - ZegoCloud - (Voice and video calling service integration)
-- PostgreSQL - (Relational database management system)
+
 
 ## Prerequisites
 
