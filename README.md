@@ -22,9 +22,10 @@ This project aims to replicate the core functionality of the popular messaging a
 
 ## Demo
 
-The E-commerce demo can be viewed online here:
+The E-commerce website can be viewed online here:
 https://whatsapp-clone-peach-nine.vercel.app
 
+Check out demo video here: [Demo video](https://res.cloudinary.com/cloudtrial/video/upload/v1715411726/InShot_20240510_130024063_qgchjr.mp4)
 
 ## Screenshots
 
@@ -35,10 +36,13 @@ https://whatsapp-clone-peach-nine.vercel.app
 ![Home](https://res.cloudinary.com/cloudtrial/image/upload/v1715094662/Screenshot_225_pdxsbw.png)
 
 - Calling Feature
-![Post](https://res.cloudinary.com/cloudtrial/image/upload/v1715094663/Screenshot_229_zw7crm.png)
+![Calling Feature](https://res.cloudinary.com/cloudtrial/image/upload/v1715094663/Screenshot_229_zw7crm.png)
 
 - Search Message
-![Profile](https://res.cloudinary.com/cloudtrial/image/upload/v1715094661/Screenshot_233_zulm6g.png)
+![Search Message](https://res.cloudinary.com/cloudtrial/image/upload/v1715094661/Screenshot_233_zulm6g.png)
+
+- Profile
+![Profile](https://res.cloudinary.com/cloudtrial/image/upload/v1715094661/Screenshot_232_hnohwl.png)
 
 ## Tech Stack
 
